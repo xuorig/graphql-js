@@ -234,6 +234,7 @@ export function extendSchemaImpl(
     astNode: schemaDef ?? schemaConfig.astNode,
     extensionASTNodes: schemaConfig.extensionASTNodes.concat(schemaExtensions),
     assumeValid: options?.assumeValid ?? false,
+    collectReferencedTypes: options?.collectReferencedTypes ?? true,
   };
 
   // Below are functions used for producing this schema that have closed over

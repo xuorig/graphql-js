@@ -41,6 +41,7 @@ import {
   isInputObjectType,
   getNamedType,
 } from './definition';
+import { config } from 'chai';
 
 /**
  * Test if the given value is a GraphQL schema.
@@ -173,34 +174,37 @@ export class GraphQLSchema {
     // To preserve order of user-provided types, we add first to add them to
     // the set of "collected" types, so `collectReferencedTypes` ignore them.
     const allReferencedTypes: Set<GraphQLNamedType> = new Set(config.types);
-    if (config.types != null) {
-      for (const type of config.types) {
-        // When we ready to process this type, we remove it from "collected" types
-        // and then add it together with all dependent types in the correct position.
-        allReferencedTypes.delete(type);
-        collectReferencedTypes(type, allReferencedTypes);
-      }
-    }
 
-    if (this._queryType != null) {
-      collectReferencedTypes(this._queryType, allReferencedTypes);
-    }
-    if (this._mutationType != null) {
-      collectReferencedTypes(this._mutationType, allReferencedTypes);
-    }
-    if (this._subscriptionType != null) {
-      collectReferencedTypes(this._subscriptionType, allReferencedTypes);
-    }
-
-    for (const directive of this._directives) {
-      // Directives are not validated until validateSchema() is called.
-      if (isDirective(directive)) {
-        for (const arg of directive.args) {
-          collectReferencedTypes(arg.type, allReferencedTypes);
+    if (config.collectReferencedTypes) {
+      if (config.types != null) {
+        for (const type of config.types) {
+          // When we ready to process this type, we remove it from "collected" types
+          // and then add it together with all dependent types in the correct position.
+          allReferencedTypes.delete(type);
+          collectReferencedTypes(type, allReferencedTypes);
         }
       }
+
+      if (this._queryType != null) {
+        collectReferencedTypes(this._queryType, allReferencedTypes);
+      }
+      if (this._mutationType != null) {
+        collectReferencedTypes(this._mutationType, allReferencedTypes);
+      }
+      if (this._subscriptionType != null) {
+        collectReferencedTypes(this._subscriptionType, allReferencedTypes);
+      }
+
+      for (const directive of this._directives) {
+        // Directives are not validated until validateSchema() is called.
+        if (isDirective(directive)) {
+          for (const arg of directive.args) {
+            collectReferencedTypes(arg.type, allReferencedTypes);
+          }
+        }
+      }
+      collectReferencedTypes(__Schema, allReferencedTypes);
     }
-    collectReferencedTypes(__Schema, allReferencedTypes);
 
     // Storing the resulting map for reference by the schema.
     this._typeMap = Object.create(null);
@@ -384,6 +388,7 @@ export type GraphQLSchemaConfig = {|
   extensions?: ?ReadOnlyObjMapLike<mixed>,
   astNode?: ?SchemaDefinitionNode,
   extensionASTNodes?: ?$ReadOnlyArray<SchemaExtensionNode>,
+  collectReferencedTypes?: ?boolean,
   ...GraphQLSchemaValidationOptions,
 |};
 

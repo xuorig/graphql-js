@@ -33,6 +33,7 @@ export type BuildSchemaOptions = {|
    * Default: false
    */
   assumeValidSDL?: boolean,
+  collectReferencedTypes?: boolean,
 |};
 
 /**
@@ -124,5 +125,6 @@ export function buildSchema(
     commentDescriptions: options?.commentDescriptions,
     assumeValidSDL: options?.assumeValidSDL,
     assumeValid: options?.assumeValid,
+    collectReferencedTypes: options?.collectReferencedTypes,
   });
 }
